@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from tqdm import tqdm
-DATA_DIR = './dataset/trumans'
+DATA_DIR = './data/TRUMANS'
 JOINT_NUM = 22
 
 

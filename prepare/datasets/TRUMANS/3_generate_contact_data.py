@@ -18,7 +18,7 @@ kinematic_chain = SKELETON_CHAIN.SMPLH['kinematic_chain'] # remove the hands, ja
 
 def load_trumans(min_horizon: int, max_horizon: int, **kwargs: Dict) -> Tuple:
     """ Load necessary base data """
-    data_dir = 'dataset/trumans'
+    data_dir = 'data/TRUMANS'
 
     # Load necessary data
     seg_names = np.load(os.path.join(data_dir, 'seg_name.npy'))
@@ -194,19 +194,20 @@ def process(motions, scene_data, save_dir, num_points: int=8192, region_size: fl
     REGION_SIZE = region_size
     TRAJ_PAD = REGION_SIZE * kwargs.get('traj_pad_ratio', 0.5)
 
-    train_set = json.load(open('dataset/trumans/train_set.json'))
-    test_set = json.load(open('dataset/trumans/test_set.json'))
+    train_set = json.load(open('data/TRUMANS/train_set.json'))
+    test_set = json.load(open('data/TRUMANS/test_set.json'))
 
     anno_list = []
-    train_idx, test_idx = 0, 0
+    idx = 0
+    train_idx, test_idx = [], []
 
     for i in tqdm(range(len(motions))):
         pose_seq, scene_id, seg_name, motion_index, motion_text = motions[i]
         
         if f'{seg_name}_{motion_index}' in train_set:
-            split = 'train'
+            train_idx.append(idx)
         elif f'{seg_name}_{motion_index}' in test_set:
-            split = 'test'
+            test_idx.append(idx)
         else:
             continue    # skip val
     
@@ -282,13 +283,12 @@ def process(motions, scene_data, save_dir, num_points: int=8192, region_size: fl
         # visualize_contact_map(partial_scene[:, 0:3], partial_scene[:, 3:6], dist, 21)
         
         ## re-index and save
-        idx = f'{train_idx:0>5d}' if split == "train" else f'{test_idx:0>5d}'
-        save_motion_path = os.path.join(save_dir, 'motions', split, f'{idx}.npy')
+        save_motion_path = os.path.join(save_dir, 'motions', f'{idx:0>5d}.npy')
         os.makedirs(os.path.dirname(save_motion_path), exist_ok=True)
         with open(save_motion_path, 'wb') as fp:
             np.save(fp, pose_seq)
 
-        save_scene_path = os.path.join(save_dir, 'contacts', split, f'{idx}.npz')
+        save_scene_path = os.path.join(save_dir, 'contacts', f'{idx:0>5d}.npz')
         os.makedirs(os.path.dirname(save_scene_path), exist_ok=True) 
 
         with open(save_scene_path, 'wb') as fp:
@@ -304,11 +304,20 @@ def process(motions, scene_data, save_dir, num_points: int=8192, region_size: fl
             scene_data[scene_id],
         ])
 
-        if split == "train":    
-            train_idx += 1
-        else:
-            test_idx += 1
-        
+        idx += 1
+    
+    assert len(train_idx) + len(test_idx) == len(set(train_idx + test_idx)), "Duplicate index!"
+    
+    with open('./data/TRUMANS/train.txt', 'w') as f:
+        for i in train_idx:
+            f.write(f'{i:0>6d}\n')
+    with open('./data/TRUMANS/test.txt', 'w') as f:
+        for i in test_idx:
+            f.write(f'{i:0>6d}\n')
+    with open('./data/TRUMANS/all.txt', 'w') as f:
+        for i in range(len(train_idx) + len(test_idx)):
+            f.write(f'{i:0>6d}\n')
+
     with open(os.path.join(save_dir, 'anno.csv'), 'w') as fp:
         csvwriter = csv.writer(fp)
         csvwriter.writerow(['scene_id', 'scene_trans_x', 'scene_trans_y', 'scene_trans_z', 'utterance', 'others'])
@@ -342,7 +351,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--min_horizon', type=int, default=24)
-    parser.add_argument('--max_horizon', type=int, default=120)
+    parser.add_argument('--max_horizon', type=int, default=196)
     parser.add_argument('--num_points', type=int, default=8192)
     parser.add_argument('--segment_horizon', type=int, default=120)
     parser.add_argument('--segment_stride', type=int, default=4)
@@ -352,7 +361,8 @@ if __name__ == '__main__':
     parser.add_argument('--traj_pad_ratio', type=float, default=0.5)
     args = parser.parse_args()
 
-    save_dir = f'./dataset/trumans/contact_motion/'
+    save_dir = f'./data/TRUMANS/contact_motion/'
+    os.makedirs(save_dir, exist_ok=True)
     motions, scene_data = eval('load_trumans')(**vars(args))
     # visualize(motions, scene_data)
     process(motions, scene_data, save_dir, **vars(args))

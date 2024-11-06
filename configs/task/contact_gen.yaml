@@ -33,7 +33,7 @@ dataset:
   name: 'ContactMapDataset'
   data_dir: './data'
   shuffle_seed: ${seed}
-  sets: ['HumanML3D', 'HUMANISE', 'PROX'] # ['HumanML3D', 'HUMANISE', 'PROX']
+  sets: ['HumanML3D', 'HUMANISE', 'PROX', 'TRUMANS'] # ['HumanML3D', 'HUMANISE', 'PROX']
   sets_config:
     HumanML3D:
       ratio: 1.0 # the ratio of the dataset to use
@@ -45,6 +45,8 @@ dataset:
       load_text: true
     PROX:
       ratio: 1.0 # the ratio of the dataset to use
+    TRUMANS:
+      load_text: true
 
   data_repr: ${model.data_repr}
   data_repr_joints: [0, 10, 11, 12, 20, 21]

@@ -526,7 +526,7 @@ class ContactMapDataset(Dataset):
                 logger.info(f"Load mean and std from {mean_std_path}")
         except:
             contact_list = []
-            for s, i, _, _, _ in self.all_data:
+            for s, i, _, _, _ in tqdm(self.all_data, desc='Prepare statistics', total=len(self.all_data)):
                 cont_file = os.path.join(self.data_dir, f'{s}/contact_motion/contacts/{i:0>5}.npz')
                 if s == 'HumanML3D' and self.sets_config.HumanML3D.use_fur:
                     cont_file = os.path.join(self.data_dir, f'{s}/contact_motion/contacts_fur/{i:0>5}.npz')

@@ -11,6 +11,7 @@ time_emb_dim: 128
 ## 1. text
 text_model:
   version: 'ViT-B/32'
+  model_path: 'clip_model/ViT-B-32.pt'
   max_length: 32
 
 ## 2. scene

@@ -427,7 +427,8 @@ class CDM(nn.Module):
         self.text_max_length = cfg.text_model.max_length
         self.text_feat_dim, self.text_feat_type = get_lang_feat_dim_type(self.text_model_name)
         if self.text_feat_type == 'clip':
-            self.text_model = load_and_freeze_clip_model(self.text_model_name)
+            # self.text_model = load_and_freeze_clip_model(self.text_model_name)
+            self.text_model = load_and_freeze_clip_model(cfg.text_model.model_path)
         elif self.text_feat_type == 'bert':
             self.tokenizer, self.text_model = load_and_freeze_bert_model(self.text_model_name)
         else:

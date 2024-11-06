@@ -123,7 +123,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='./dataset/trumans')
+    parser.add_argument('--data_dir', type=str, default='./data/TRUMANS')
     parser.add_argument('--point_num', type=int, default=8192)
     parser.add_argument('--sample', type=str, default='none', choices=['random', 'mesh_fps', 'vert_fps', 'none'])
     # parser.add_argument('--sample', type=str, default='random', choices=['random', 'mesh_fps', 'vert_fps', 'none'])

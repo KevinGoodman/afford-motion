@@ -6,6 +6,5 @@ body_models
 a.py
 *.hide
 .vscode
-dataset
-
 outputs
+clip_model
