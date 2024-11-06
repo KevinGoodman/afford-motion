@@ -226,7 +226,7 @@ class MotionXDataset(Dataset):
 
         if self.phase == 'test':
             if s == 'HUMANISE':
-                target_mask = np.load(os.path.join(self.data_dir, f'{s}/contact_motion/target_mask/{i:0>5}.npy'))
+                target_mask = np.load(os.path.join(self.data_dir, f'{s}/contact_motion/+/{i:0>5}.npy'))
                 data['info_obj_mask'] = target_mask
             else:
                 data['info_obj_mask'] = None
