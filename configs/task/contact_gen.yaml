@@ -46,6 +46,7 @@ dataset:
     PROX:
       ratio: 1.0 # the ratio of the dataset to use
     TRUMANS:
+      ratio: 1.0 # the ratio of the dataset to use
       load_text: true
 
   data_repr: ${model.data_repr}
