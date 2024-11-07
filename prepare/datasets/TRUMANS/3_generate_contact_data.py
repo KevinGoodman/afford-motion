@@ -73,7 +73,7 @@ def load_trumans(min_horizon: int, max_horizon: int, **kwargs: Dict) -> Tuple:
                     scene_data[scene_id] = {
                         'scene_name': scene_name,
                         'scene_text': scene_text,
-                        'pcd': np.load(os.path.join(data_dir, 'Scene_points_none', f'{scene_name}.npy')),
+                        'pcd': np.load(os.path.join(data_dir, 'Scene_points_none', f'{scene_name}.npy')),   # just the original full scene point cloud
                         'mesh_path': os.path.join(data_dir, 'Scene_mesh', f'{scene_name}.obj'),
                     }
                     motion_index += 1

@@ -11,6 +11,9 @@ from utils.evaluate import create_evaluator
 from utils.training import load_ckpt
 from utils.misc import compute_repr_dimesion
 
+from tqdm import tqdm
+
+
 def test(cfg: DictConfig) -> None:
     """ Begin testing with this function
 
@@ -65,9 +68,11 @@ def test(cfg: DictConfig) -> None:
         k_samples_idxs = []
     logger.info(f'k_samples_idxs: {k_samples_idxs}')
 
-    for i, data in enumerate(test_dataloader):
+    for i, data in tqdm(enumerate(test_dataloader), total=len(test_dataloader)-1):
         logger.info(f"batch index: {i}, is k_sample_batch: {i in k_samples_idxs}, case index: {data['info_index']}")
         x = data['x']
+
+        B_ = x.shape[0]
 
         x_kwargs = {}
         if 'x_mask' in data:
@@ -82,7 +87,7 @@ def test(cfg: DictConfig) -> None:
 
         use_k_sample = i in k_samples_idxs
         repeat_times = evaluator.k_samples if use_k_sample else 1
-        
+
         sample_list_np = []
         k_samples_list_np = []
         for k in range(repeat_times):
@@ -101,15 +106,15 @@ def test(cfg: DictConfig) -> None:
             )
 
             if k == 0:
-                for bsi in range(B):
+                for bsi in range(B_):
                     sample_list_np.append(sample[bsi].cpu().numpy())
             
             if use_k_sample:
-                for bsi in range(B):
+                for bsi in range(B_):
                     k_samples_list_np.append(sample[bsi].cpu().numpy())
-        
+
         ## 1 sample
-        for bsi in range(B):
+        for bsi in range(B_):
             res_dict = {'sample': sample_list_np[bsi]}
             for key in data:
                 if torch.is_tensor(data[key]):
@@ -117,10 +122,10 @@ def test(cfg: DictConfig) -> None:
                 else:
                     res_dict[key] = data[key][bsi]
             sample_list.append(res_dict)
-        
+
         ## k samples
         if use_k_sample:
-            for bsi in range(B):
+            for bsi in range(B_):
                 res_dict = {'k_samples': np.stack(k_samples_list_np[bsi::B])}
                 for key in data:
                     if torch.is_tensor(data[key]):
@@ -128,11 +133,11 @@ def test(cfg: DictConfig) -> None:
                     else:
                         res_dict[key] = data[key][bsi]
                 k_samples_list.append(res_dict)
-        
+
         ## stop evaluation if reach the max number of samples
         if i + 1 >= evaluator.eval_nbatch:
             break
-    
+
     ## compute metrics
     evaluator.evaluate(sample_list, k_samples_list, test_dir, test_dataloader, device=device)
     evaluator.report(test_dir)
